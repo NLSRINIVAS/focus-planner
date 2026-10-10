@@ -1,0 +1,69 @@
+# .gitlab-ci.yml
+# GitLab CI/CD pipeline for Focus Planner
+
+image: node:18-alpine
+
+variables:
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  NODE_ENV: "production"
+
+cache:
+  paths:
+    - node_modules/
+    - .npm/
+  key:
+    files:
+      - package-lock.json
+
+stages:
+  - build
+  - deploy
+
+# Build stage: install dependencies and build
+build:
+  stage: build
+  script:
+    - npm ci --cache .npm
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - node_modules/
+      - out/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+# Deploy to GitLab Pages (main branch)
+pages:
+  stage: deploy
+  script:
+    - npm ci
+    # Export as static HTML for GitLab Pages
+    - npm run export
+    # Copy build to public directory
+    - mkdir -p public
+    - cp -r out/* public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+  environment:
+    name: production
+    url: https://$CI_PROJECT_NAMESPACE.gitlab.io/$CI_PROJECT_NAME
+
+# Alternative: Deploy to a server or container registry
+# Uncomment and customize for your hosting provider
+
+# deploy_docker:
+#   stage: deploy
+#   image: docker:latest
+#   services:
+#     - docker:dind
+#   script:
+#     - docker build -t $CI_REGISTRY_IMAGE:latest .
+#     - docker push $CI_REGISTRY_IMAGE:latest
+#   only:
+#     - main

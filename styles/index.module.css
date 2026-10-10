@@ -1,0 +1,237 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+.header p {
+  color: var(--mut);
+  margin: 4px 0;
+}
+
+/* ... rest of the .classes keep them all ... */
+.nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ln);
+}
+
+.navBtn {
+  flex: none;
+  background: var(--card);
+  color: var(--tx);
+  border: 1px solid var(--ln);
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.navBtn:hover {
+  background: var(--ac);
+  color: white;
+  border-color: var(--ac);
+}
+
+.navBtn.active {
+  background: var(--ac);
+  color: white;
+  border-color: var(--ac);
+}
+
+.main {
+  min-height: calc(100vh - 300px);
+}
+
+.section {
+  background: var(--card);
+  border: 1px solid var(--ln);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section h2 {
+  font-size: 18px;
+  margin: 0 0 12px;
+}
+
+.section p {
+  color: var(--mut);
+  margin: 0 0 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.grid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 13px;
+  color: var(--mut);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid var(--ln);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--tx);
+  font: inherit;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--ac);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.btn {
+  background: var(--ac);
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.result {
+  margin-top: 16px;
+  background: var(--bg);
+  border: 1px solid var(--ln);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.result h3 {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.table tr {
+  border-bottom: 1px solid var(--ln);
+}
+
+.table td {
+  padding: 8px 0;
+  vertical-align: top;
+}
+
+.table td:first-child {
+  font-weight: 500;
+  color: var(--mut);
+  width: 40%;
+}
+
+.table td:last-child {
+  font-weight: 600;
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.wn {
+  color: var(--wn);
+}
+
+.bd {
+  color: var(--bd);
+}
+
+.response {
+  background: var(--bg);
+  border: 1px solid var(--ln);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 12px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.footer {
+  text-align: center;
+  color: var(--mut);
+  font-size: 12px;
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ln);
+}
+
+.footer p {
+  margin: 4px 0;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .nav {
+    gap: 4px;
+  }
+
+  .navBtn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
