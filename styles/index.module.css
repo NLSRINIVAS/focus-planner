@@ -19,7 +19,6 @@
   margin: 4px 0;
 }
 
-/* ... rest of the .classes keep them all ... */
 .nav {
   display: flex;
   gap: 6px;
@@ -88,14 +87,14 @@
   flex-direction: column;
 }
 
-label {
+.label {
   font-size: 13px;
   color: var(--mut);
   margin-bottom: 6px;
   font-weight: 500;
 }
 
-input {
+.input {
   padding: 8px;
   border: 1px solid var(--ln);
   border-radius: 8px;
@@ -104,7 +103,7 @@ input {
   font: inherit;
 }
 
-input:focus {
+.input:focus {
   outline: none;
   border-color: var(--ac);
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
