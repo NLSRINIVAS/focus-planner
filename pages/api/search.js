@@ -1,107 +1,105 @@
-// pages/api/search.js (HuggingFace version)
-import axios from "axios";
-
+// pages/api/search.js
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { query, topic } = req.body;
+  const { prompt } = req.body;
 
-  if (!query) {
-    return res.status(400).json({ error: "Query required" });
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required" });
+  }
+
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "HuggingFace API key not configured" });
   }
 
   try {
-    const huggingFaceToken = process.env.HUGGINGFACE_API_KEY;
+    console.log("🔄 Calling HuggingFace Serverless API...");
 
-    if (!huggingFaceToken) {
-      return res.status(400).json({
-        error: "HuggingFace API key not configured",
-        hint: "Add HUGGINGFACE_API_KEY to .env.local",
-      });
-    }
-
-    // Use HuggingFace Inference API with a free model
-    // Using meta-llama/Llama-2-7b-chat (free, good quality)
-    const response = await axios.post(
+    const response = await fetch(
       "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat",
       {
-        inputs: `Today is ${new Date().toDateString()}. You are a research analyst for an Indian DevOps engineer planning career and relocation.
-
-Topic: ${topic || query}
-
-Provide the most recent developments you know of (as of today), as short bullets (max 200 words), with what changed and what it means. End with a line naming official sources to verify. Plain text only, no markdown.`,
-        parameters: {
-          max_new_tokens: 300,
-          temperature: 0.7,
-          top_p: 0.95,
-        },
-      },
-      {
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${huggingFaceToken}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        timeout: 60000, // 60 second timeout
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_length: 500,
+            temperature: 0.7,
+            top_p: 0.9,
+          },
+        }),
       }
     );
 
-    // HuggingFace returns an array of results
-    let output = "";
-    if (Array.isArray(response.data) && response.data.length > 0) {
-      output = response.data[0].generated_text || "";
-    } else if (response.data.generated_text) {
-      output = response.data.generated_text;
-    } else {
-      output = JSON.stringify(response.data);
-    }
+    console.log("📊 Response status:", response.status);
 
-    // Clean up the output (remove the prompt from the response)
-    output = output.replace(/Topic:.*?Plain text only.*?\./, "").trim();
-
-    if (!output) {
-      return res.status(500).json({
-        error: "Empty response from HuggingFace",
-        note: "Model may be loading. Try again in a moment.",
+    if (response.status === 429) {
+      return res.status(429).json({
+        error: "Rate limited by HuggingFace. Please try again in a few seconds.",
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: output,
+    if (response.status === 401) {
+      return res.status(401).json({
+        error: "Invalid HuggingFace API key",
+      });
+    }
+
+    if (response.status === 503) {
+      return res.status(503).json({
+        error: "HuggingFace model is loading. Please try again in 30 seconds.",
+      });
+    }
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ HuggingFace error:", data);
+      return res.status(response.status).json({
+        error: data.error || "HuggingFace API error",
+      });
+    }
+
+    // Extract text from response
+    let responseText = "";
+    if (Array.isArray(data)) {
+      responseText = data[0]?.generated_text || "";
+    } else if (data.generated_text) {
+      responseText = data.generated_text;
+    } else {
+      responseText = JSON.stringify(data);
+    }
+
+    console.log("✅ Success:", responseText.substring(0, 100) + "...");
+
+    res.status(200).json({
+      response: responseText,
       timestamp: new Date().toISOString(),
-      source: "HuggingFace Llama-2-7b-chat (free tier)",
     });
   } catch (error) {
-    console.error("HuggingFace API error:", error.message);
+    console.error("❌ API Error:", error.message);
 
-    // Handle specific HuggingFace errors
-    if (error.response?.status === 429) {
-      return res.status(429).json({
-        error: "Rate limited",
-        message: "HuggingFace free tier has usage limits. Try again in a moment.",
-      });
-    }
-
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        error: "Invalid API key",
-        message: "Check your HUGGINGFACE_API_KEY in .env.local",
+    // Network error handling
+    if (error.code === "ENOTFOUND" || error.message.includes("getaddrinfo")) {
+      return res.status(503).json({
+        error: "Network error: Cannot reach HuggingFace. This might be a temporary connectivity issue. Please try again.",
       });
     }
 
     if (error.message.includes("timeout")) {
       return res.status(504).json({
-        error: "Request timeout",
-        message: "Model is busy. HuggingFace free tier can be slow. Try again.",
+        error: "Request timeout. HuggingFace took too long to respond. Please try again.",
       });
     }
 
-    return res.status(500).json({
-      error: "Failed to fetch data from HuggingFace",
-      message: error.message,
-      hint: "Free HuggingFace models may have delays. Try again in 30 seconds.",
+    res.status(500).json({
+      error: error.message || "Unknown error occurred",
     });
   }
 }
